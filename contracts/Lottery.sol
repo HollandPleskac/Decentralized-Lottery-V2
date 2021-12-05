@@ -3,10 +3,9 @@
 pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
-// Chainlink VRF
-
-contract Lottery {
+contract Lottery is VRFConsumerBase  {
 
     enum LOTTERY_STATE {
         OPEN,
@@ -16,11 +15,22 @@ contract Lottery {
 
     AggregatorV3Interface internal priceFeed;
 
+    bytes32 internal keyHash;
+    uint256 internal fee;
+    
     address[] public participants;
+    uint256 public randomResult;
     LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
 
-    constructor() {
+    constructor() 
+        VRFConsumerBase(
+            0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9, // VRF Coordinator
+            0xa36085F69e2889c224210F603D836748e7dC0088  // LINK Token
+        )
+     {
         priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
+        keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
+        fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)
     }
 
     function startLottery() public {
@@ -37,9 +47,9 @@ contract Lottery {
         state = LOTTERY_STATE.CLOSED;
     }
 
-    function getRandomNumber() internal pure returns(uint256) {
-        return 0;
-    }
+    // function getRandomNumber() internal pure returns(uint256) {
+    //     return 0;
+    // }
     
     function enterLottery() public payable {
         require(state == LOTTERY_STATE.OPEN, "Can't enter a closed lottery, lottery must be open");
@@ -56,5 +66,17 @@ contract Lottery {
         uint256 ethPrice = getLatestPrice();
         return (ethPrice * ethAmount) / (10**18);
     }
+
+
+
+    function getRandomNumber() public returns (bytes32 requestId) {
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
+        return requestRandomness(keyHash, fee);
+    }
+
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+        randomResult = randomness;
+    }
+
 
 }
