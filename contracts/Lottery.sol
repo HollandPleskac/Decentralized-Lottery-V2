@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.7;
 
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Chainlink VRF
-// Chainlink Price Feeds ($50)
 
 contract Lottery {
 
@@ -14,9 +14,14 @@ contract Lottery {
         PICKING_WINNER
     }
 
-    LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
+    AggregatorV3Interface internal priceFeed;
+
     address[] public participants;
-    // TODO : last winner
+    LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
+
+    constructor() {
+        priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
+    }
 
     function startLottery() public {
         require(state == LOTTERY_STATE.CLOSED, "Lottery state must be closed to start a new lottery");
@@ -36,9 +41,20 @@ contract Lottery {
         return 0;
     }
     
-    function enterLottery() public {
+    function enterLottery() public payable {
         require(state == LOTTERY_STATE.OPEN, "Can't enter a closed lottery, lottery must be open");
+        require(ethereumToUSD(msg.value) > 50, "Need to send more than $50 in ETH");
         participants.push(msg.sender);
+    }
+
+    function getLatestPrice() public view returns (uint256) {
+        (, int price,,,) = priceFeed.latestRoundData();
+        return uint256(price * 10**10); // price feed has 8 decimals, make it 18 decimals
+    }
+
+    function ethereumToUSD(uint ethAmount) public view returns (uint256) {
+        uint256 ethPrice = getLatestPrice();
+        return (ethPrice * ethAmount) / (10**18);
     }
 
 }
