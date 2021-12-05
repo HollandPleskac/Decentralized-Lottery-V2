@@ -22,15 +22,21 @@ contract Lottery is VRFConsumerBase  {
     uint256 public randomResult;
     LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
 
-    constructor() 
+    constructor(
+        address _priceFeedAddress,
+        address _vrfCoordinator,
+        address _link,
+        uint256 _fee,
+        bytes32 _keyhash
+    ) 
         VRFConsumerBase(
-            0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9, // VRF Coordinator
-            0xa36085F69e2889c224210F603D836748e7dC0088  // LINK Token
+            _vrfCoordinator, // VRF Coordinator
+            _link  // LINK Token
         )
      {
-        priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
-        keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
-        fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)
+        priceFeed = AggregatorV3Interface(_priceFeedAddress);
+        keyHash = _keyhash;
+        fee = _fee; // 0.1 LINK (Varies by network)
     }
 
     function startLottery() public {
