@@ -18,3 +18,9 @@ const networkConfig = {
 module.exports = {
   networkConfig
 }
+
+// TODO : add rinkeby network
+// events into lottery
+// frontend that interacts with the lottery
+// learn how to write tests (1 hr video) do that tmo
+// write a bunch of tests

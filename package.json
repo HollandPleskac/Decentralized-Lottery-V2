@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@appliedblockchain/chainlink-plugins-fund-link": "^0.0.3",
     "@chainlink/contracts": "^0.2.2",
     "@chainlink/token": "^1.1.0",
     "dotenv": "^10.0.0",
