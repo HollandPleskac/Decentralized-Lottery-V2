@@ -37,6 +37,10 @@ module.exports = {
     kovan: {
       url: process.env.KOVAN_RPC_URL,
       accounts: [process.env.DEV_ACC_PRIVATE_KEY]
+    },
+    rinkeby: {
+      url: process.env.RINKEBY_RPC_URL,
+      accounts: [process.env.DEV_ACC_PRIVATE_KEY]
     }
   }
 };
