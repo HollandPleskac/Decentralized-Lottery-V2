@@ -20,6 +20,7 @@ contract Lottery is VRFConsumerBase  {
     
     address[] public participants;
     uint256 public randomResult;
+    address lastWinner;
     LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
 
     constructor(
@@ -43,24 +44,12 @@ contract Lottery is VRFConsumerBase  {
         require(state == LOTTERY_STATE.CLOSED, "Lottery state must be closed to start a new lottery");
         state = LOTTERY_STATE.OPEN;
     }
-
-    function endLottery() public {
-        require(state == LOTTERY_STATE.OPEN, "Lottery must be in process");
-        state = LOTTERY_STATE.PICKING_WINNER;
-        // TODO : get random number
-        // TODO : transfer funds
-        participants = new address[](0);
-        state = LOTTERY_STATE.CLOSED;
-    }
-
-    // function getRandomNumber() internal pure returns(uint256) {
-    //     return 0;
-    // }
     
     function enterLottery() public payable {
         require(state == LOTTERY_STATE.OPEN, "Can't enter a closed lottery, lottery must be open");
         require(ethereumToUSD(msg.value) > 50, "Need to send more than $50 in ETH");
         participants.push(msg.sender);
+        // player enters event
     }
 
     function getLatestPrice() public view returns (uint256) {
@@ -74,15 +63,21 @@ contract Lottery is VRFConsumerBase  {
     }
 
 
-
-    function getRandomNumber() public returns (bytes32 requestId) {
+    function endLottery() public returns (bytes32 requestId) {
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
+        state = LOTTERY_STATE.PICKING_WINNER;
+        // picking winner event
         return requestRandomness(keyHash, fee);
     }
 
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-        randomResult = randomness;
+        require(state == LOTTERY_STATE.OPEN, "Lottery must be in process");
+        // TODO : get random number
+        uint256 indexOfWinner = randomness % participants.length;
+        // TODO : transfer funds
+        lastWinner = participants[indexOfWinner];
+        participants = new address[](0);
+        state = LOTTERY_STATE.CLOSED;
+        // winner chosen event
     }
-
-
 }
