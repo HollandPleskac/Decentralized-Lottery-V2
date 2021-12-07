@@ -7,6 +7,7 @@ let mockLinkTokenAddress
 let mockLinkToken
 let mockV3AggregatorAddress
 let vrfCoordinatorMockAddress
+let lottery
 
 
 describe("Lottery Unit Test", function () {
@@ -23,7 +24,7 @@ describe("Lottery Unit Test", function () {
   beforeEach(async function () {
     // Deploy Lottery
     const Lottery = await hre.ethers.getContractFactory("Lottery")
-    const lottery = await Lottery.deploy(
+    lottery = await Lottery.deploy(
       mockV3AggregatorAddress,
       vrfCoordinatorMockAddress,
       mockLinkTokenAddress,
@@ -39,18 +40,41 @@ describe("Lottery Unit Test", function () {
     console.log("Successfully funded link")
   });
 
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+  // it("Should return the new greeting once it's changed", async function () {
+  //   const Greeter = await ethers.getContractFactory("Greeter");
+  //   const greeter = await Greeter.deploy("Hello, world!");
+  //   await greeter.deployed();
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+  //   expect(await greeter.greet()).to.equal("Hello, world!");
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+  //   const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+  //   // wait until the transaction is mined
+  //   await setGreetingTx.wait();
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
-  });
+  //   expect(await greeter.greet()).to.equal("Hola, mundo!");
+  // });
+
+
+  it("test get entrance fee", async function () {
+    // $2000 to 1 ETH (setup as default value when deploying MockV3Aggregator)
+    // usdEntranceFee = $50
+    // 2000/1 == 50/x == 0.025 
+    // 0.025 ether == $50
+    const expectedEntranceFee = ethers.utils.parseEther('0.025')
+    const entranceFee = await lottery.getEntranceFee()
+    expect(entranceFee).to.equal(expectedEntranceFee);
+  })
+
+  // it("test cant enter unless started", async function () {
+
+  // })
+
+  // it("test can enter lottery when started", async function () {
+
+  // })
+
+  // it("test can pick winner correctly", async function () {
+
+  // })
 });

@@ -21,6 +21,7 @@ contract Lottery is VRFConsumerBase  {
     address[] public participants;
     uint256 public randomResult;
     address lastWinner;
+    uint256 usdEntryFee;
     LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
 
     constructor(
@@ -38,6 +39,7 @@ contract Lottery is VRFConsumerBase  {
         priceFeed = AggregatorV3Interface(_priceFeedAddress);
         keyHash = _keyhash;
         fee = _fee; // 0.1 LINK (Varies by network)
+        usdEntryFee = 50*(10**18); // $50
     }
 
     function startLottery() public {
@@ -60,6 +62,14 @@ contract Lottery is VRFConsumerBase  {
     function ethereumToUSD(uint ethAmount) public view returns (uint256) {
         uint256 ethPrice = getLatestPrice();
         return (ethPrice * ethAmount) / (10**18);
+    }
+
+    function getEntranceFee() public view returns(uint256) {
+      (, int price,,,) = priceFeed.latestRoundData();
+      uint256 adjustedPrice = uint256(price * 10**10); // price feed has 8 decimals, make it 18 decimals
+
+      uint256 costToEnter = (usdEntryFee * 10**18) / adjustedPrice; // 50 dollars in ethereum
+      return costToEnter;
     }
 
 
