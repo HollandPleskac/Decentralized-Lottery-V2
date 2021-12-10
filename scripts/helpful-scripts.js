@@ -8,6 +8,13 @@ async function deployMocks() {
   await mockLinkToken.deployed();
   console.log("MockLinkToken deployed at address", mockLinkToken.address)
 
+  // ---------- Mock Oracle
+  const MockOracle = await hre.ethers.getContractFactory("MockOracle");
+  const mockOracle = await MockOracle.deploy(mockLinkToken.address);
+  await mockOracle.deployed();
+  console.log("MockOracle deployed at address", mockOracle.address)
+
+
   // ---------- Mock V3 Aggregator
   DECIMALS = 8
   INITIAL_VALUE = 200000000000 // This is 2,000
@@ -28,6 +35,7 @@ async function deployMocks() {
     mockLinkToken: mockLinkToken,
     mockV3AggregatorAddress: mockV3Aggregator.address,
     vrfCoordinatorMockAddress: vrfCoordinatorMock.address,
+    vrfCoordinatorMock: vrfCoordinatorMock
   }
 }
 
@@ -64,21 +72,21 @@ async function deployTestnet() {
   const networkName = hre.network.name
   console.log(`Deploying to ${networkName} network`)
 
-    // ---------- Deploy Lottery Contract
-    const Lottery = await hre.ethers.getContractFactory("Lottery")
-    const lottery = await Lottery.deploy(
-      networkConfig[networkName].ethUsdPriceFeed,
-      networkConfig[networkName].vrfCoordinator,
-      networkConfig[networkName].linkToken,
-      networkConfig[networkName].fee,
-      networkConfig[networkName].keyHash
-    )
-    await lottery.deployed()
-    console.log("Lottery deployed at address", lottery.address)
+  // ---------- Deploy Lottery Contract
+  const Lottery = await hre.ethers.getContractFactory("Lottery")
+  const lottery = await Lottery.deploy(
+    networkConfig[networkName].ethUsdPriceFeed,
+    networkConfig[networkName].vrfCoordinator,
+    networkConfig[networkName].linkToken,
+    networkConfig[networkName].fee,
+    networkConfig[networkName].keyHash
+  )
+  await lottery.deployed()
+  console.log("Lottery deployed at address", lottery.address)
 
-    // ---------- Fund Lottery Contract
-    await hre.run("fund-link", { contract: lottery.address, linkaddress: networkConfig[networkName].linkToken })
-    console.log("Successfully funded link")
+  // ---------- Fund Lottery Contract
+  await hre.run("fund-link", { contract: lottery.address, linkaddress: networkConfig[networkName].linkToken })
+  console.log("Successfully funded link")
 }
 
 module.exports = {
