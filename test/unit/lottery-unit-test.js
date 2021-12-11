@@ -74,6 +74,16 @@ describe("Lottery Unit Test", function () {
 
   })
 
+  it("can't pick winner unless participants are in the lottery", async function () {
+    // Start Lottery
+    const startTx = await lottery.startLottery()
+    await startTx.wait()
+      
+    //DONT ENTER PARTICIPANTS
+
+    await expect(lottery.endLottery()).to.be.revertedWith("Must have participants to pick a winner");
+  })
+
   it("can pick winner correctly", async function () {
     const [owner, addr1] = await ethers.getSigners();
 
@@ -95,13 +105,13 @@ describe("Lottery Unit Test", function () {
     console.log("req id", requestId)
 
     // Mock random number callback
-    const randomnessCallbackTx = await vrfCoordinatorMock.callBackWithRandomness(requestId, 777, lottery.address)
+    const randomnessCallbackTx = await vrfCoordinatorMock.callBackWithRandomness(requestId, 3, lottery.address)
     await randomnessCallbackTx.wait()
 
     // Get last winner
-    const result = await lottery.randomResult()
-    console.log("random result: ", result);
-    // can't get the winner due to pending bug https://stackoverflow.com/questions/70300213/fulfillrandomness-not-working-on-local-hardhat-network-chainlink-vrf
+    const lastWinner = await lottery.lastWinner()
+    console.log("lastWinner: ", lastWinner);
 
+    expect(lastWinner).to.equal(addr1.address);
   })
 });

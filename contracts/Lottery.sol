@@ -69,6 +69,7 @@ contract Lottery is VRFConsumerBase  {
         require(LINK.balanceOf(address(this)) * (10**18) >= fee, "Not enough LINK - fill contract with faucet");
         require(state == LOTTERY_STATE.OPEN, "Lottery must be in process");
         // TODO : Make sure that you have participants YOU DONT WANT TO %0
+        require(participants.length != 0, "Must have participants to pick a winner");
         state = LOTTERY_STATE.PICKING_WINNER;
         bytes32 requestId = requestRandomness(keyHash, fee);
         emit PickingWinner(requestId);
