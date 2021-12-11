@@ -68,15 +68,17 @@ contract Lottery is VRFConsumerBase  {
     function endLottery() public {
         require(LINK.balanceOf(address(this)) * (10**18) >= fee, "Not enough LINK - fill contract with faucet");
         require(state == LOTTERY_STATE.OPEN, "Lottery must be in process");
+        // TODO : Make sure that you have participants YOU DONT WANT TO %0
         state = LOTTERY_STATE.PICKING_WINNER;
         bytes32 requestId = requestRandomness(keyHash, fee);
         emit PickingWinner(requestId);
     }
 
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-        // uint256 indexOfWinner = randomness % participants.length; // doesn't work if commented in
+      
+        uint256 indexOfWinner = randomness % participants.length; // NOTE: be careful about %0
         // TODO : transfer funds
-        // lastWinner = participants[0]; // doesn't work if commented in
+        lastWinner = participants[indexOfWinner];
         participants = new address[](0);
         state = LOTTERY_STATE.CLOSED;
         // winner chosen event

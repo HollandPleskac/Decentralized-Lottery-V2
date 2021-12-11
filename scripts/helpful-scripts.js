@@ -1,4 +1,6 @@
 const hre = require("hardhat");
+const path = require("path");
+const fs = require("fs");
 const { networkConfig } = require("../helper-hardhat-config");
 
 async function deployMocks() {
@@ -66,6 +68,8 @@ async function deployHardhat() {
   const linkTransferTx = await mockLinkToken.transfer(lottery.address, 1)
   await linkTransferTx.wait()
   console.log("Successfully funded link")
+
+  updatePublicPath(lottery.address)
 }
 
 async function deployTestnet() {
@@ -87,6 +91,23 @@ async function deployTestnet() {
   // ---------- Fund Lottery Contract
   await hre.run("fund-link", { contract: lottery.address, linkaddress: networkConfig[networkName].linkToken })
   console.log("Successfully funded link")
+
+  updatePublicPath(lottery.address)
+}
+
+function updatePublicPath(address) {
+  // get contract from artifacts
+  const artifactsPath = path.join(__dirname, '../artifacts/contracts/Lottery.sol/Lottery.json')
+  const compiledContract = JSON.parse(fs.readFileSync(artifactsPath))
+
+  // copy contract to public directory
+  const publicPath = path.join(__dirname, "../public/Lottery.json")
+  fs.writeFileSync(publicPath, JSON.stringify(compiledContract));
+
+  // copy address to public directory
+  const publicAddressPath = path.join(__dirname, "../public/LotteryAddress.json")
+  fs.writeFileSync(publicAddressPath, JSON.stringify({ "address": address }))
+
 }
 
 module.exports = {

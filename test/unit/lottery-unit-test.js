@@ -75,10 +75,16 @@ describe("Lottery Unit Test", function () {
   })
 
   it("can pick winner correctly", async function () {
+    const [owner, addr1] = await ethers.getSigners();
 
     // Start Lottery
     const startTx = await lottery.startLottery()
     await startTx.wait()
+
+    // Enter participants
+    const options = { value: ethers.utils.parseEther("0.1") }
+    const enterLotteryAcc1Tx = await lottery.enterLottery(options)
+    const enterLotteryAcc2Tx = await lottery.connect(addr1).enterLottery(options)
 
     // End Lottery
     const endTx = await lottery.endLottery()
