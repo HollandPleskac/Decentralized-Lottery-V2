@@ -1,8 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("@appliedblockchain/chainlink-plugins-fund-link")
-
 require('dotenv').config()
-
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();

@@ -75,7 +75,7 @@ contract Lottery is VRFConsumerBase  {
         emit PickingWinner(requestId);
     }
 
-    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+    function fulfillRandomness(bytes32 requestId, uint256  randomness) internal override {
       
         uint256 indexOfWinner = randomness % participants.length; // NOTE: be careful about %0
         // TODO : transfer funds

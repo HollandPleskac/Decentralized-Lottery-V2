@@ -42,7 +42,8 @@ async function deployMocks() {
 }
 
 async function deployHardhat() {
-  console.log("Deploying to hardhat network")
+  const networkName = hre.network.name
+  console.log(`Deploying to ${networkName} network`)
   // ---------- Deploy Mock Contracts
   const {
     mockLinkTokenAddress,

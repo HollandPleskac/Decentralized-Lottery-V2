@@ -4,7 +4,7 @@ const { deployHardhat, deployTestnet } = require("./helpful-scripts");
 async function main() {
   const networkName = hre.network.name
 
-  if (networkName === "hardhat")
+  if (networkName === "hardhat" || networkName === "localhost")
     await deployHardhat()
   else
     await deployTestnet()
