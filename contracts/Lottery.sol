@@ -9,6 +9,7 @@ import "hardhat/console.sol";
 contract Lottery is VRFConsumerBase  {
 
     event PickingWinner(bytes32 requestId);
+    event PlayerEntered();
 
     enum LOTTERY_STATE {
         OPEN,
@@ -52,6 +53,7 @@ contract Lottery is VRFConsumerBase  {
         require(state == LOTTERY_STATE.OPEN, "Can't enter a closed lottery, lottery must be open");
         require(ethereumToUSD(msg.value) >= 50, "Need to send $50 or more in ETH");
         participants.push(msg.sender);
+        emit PlayerEntered();
         // player enters event
     }
 

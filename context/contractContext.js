@@ -9,12 +9,21 @@ const url = 'http://localhost:3000/'
 const ContractContext = React.createContext({
   Contract: null,
   contractAddress: null,
+  startLottery: async () => { },
+  enterLottery: async () => { },
+  endLottery: async () => { }
 })
 
 export const ContractContextProvider = (props) => {
 
   const [Contract, setContract] = useState() // capital Contract refers to the compiled contract (not the abi)
   const [contractAddress, setContractAddress] = useState()
+
+  // contract state
+  const [contractState, setContractState] = useState('')
+  const [players, setPlayers] = useState(null)
+  const [totalEther, setTotalEther] = useState(null)
+
   // state
   // players in lottery
   // total ether to be won
@@ -33,27 +42,92 @@ export const ContractContextProvider = (props) => {
       }
     }
 
-    // useEffect
-    // listen for events from the contract
-    // *add state for the events
-
-    // functions
-    // start lottery
-    // enter lottery
-    // end lottery
-
     setContractData()
   }, [])
 
+  // useEffect
+  // listen for events from the contract
+  // *add state for the events
+
+  useEffect(() => {
+    if (contractAddress) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      console.log("listing for events at ", contractAddress)
+
+      
+      // listen for events
+      const pickingWinnerFilter = {
+        address: contractAddress,
+        topics: [
+          // the name of the event, parnetheses containing the data type of each event, no spaces
+          ethers.utils.id("PickingWinner(bytes32)")
+        ]
+      }
+
+      provider.on(pickingWinnerFilter, () => {
+        console.log("picking winner event fired!")
+      })
+      
+      // player entered event
+      // lottery ended event (after picking winner ends)
+      // lottery started event (started lottery)
+      // * already did picking winner event
+
+      return (() => {
+        provider.off(filter)
+      })
+    }
+  }, [contractAddress])
 
 
+  const startLottery = async () => {
+    console.log("--- startLottery called from contractContext ---")
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
+    try {
+      const startLotteryTx = await lottery.startLottery()
+      await startLotteryTx.wait()
+    } catch (e) {
+      console.log('error starting the lottery', e)
+    }
+  }
 
+  const enterLottery = async () => {
+    console.log("--- enterLottery called from contractContext ---")
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
+    try {
+      const options = { value: ethers.utils.parseEther("0.15") }
+      const enterLotteryAcc1Tx = await lottery.enterLottery(options)
+      await enterLotteryAcc1Tx.wait()
+    } catch (e) {
+      console.log('error entering the lottery', e)
+    }
+  }
+
+  const endLottery = async () => {
+    console.log("--- endLottery called from contractContext ---")
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
+    try {
+      const endLotteryAcc1Tx = await lottery.endLottery()
+      await endLotteryAcc1Tx.wait()
+    } catch (e) {
+      console.log('error ending the lottery', e)
+    }
+  }
 
 
   return (
     <ContractContext.Provider value={{
       Contract,
       contractAddress,
+      startLottery,
+      enterLottery,
+      endLottery
     }} >
       {props.children}
     </ContractContext.Provider>
