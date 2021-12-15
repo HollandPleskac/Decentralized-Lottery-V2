@@ -45,49 +45,45 @@ export const ContractContextProvider = (props) => {
     setContractData()
   }, [])
 
-  // useEffect
-  // listen for events from the contract
-  // *add state for the events
 
   useEffect(() => {
     if (contractAddress) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
       console.log("listing for events at ", contractAddress)
 
-      
-      // listen for events
-      const pickingWinnerFilter = {
+      const stateChangeEvent = {
         address: contractAddress,
         topics: [
           // the name of the event, parnetheses containing the data type of each event, no spaces
-          ethers.utils.id("PickingWinner(bytes32)")
+          ethers.utils.id("StateChange(string)")
         ]
       }
 
-      provider.on(pickingWinnerFilter, () => {
-        console.log("picking winner event fired!")
+      lottery.on(stateChangeEvent, (state) => {
+        console.log("state change event fired! nefw state:", state)
       })
-      
-      // player entered event
-      // lottery ended event (after picking winner ends)
-      // lottery started event (started lottery)
-      // * already did picking winner event
 
       return (() => {
-        provider.off(filter)
+        provider.off(stateChangeEvent)
       })
     }
-  }, [contractAddress])
+  }, [contractAddress, Contract.abi])
+
+
 
 
   const startLottery = async () => {
-    console.log("--- startLottery called from contractContext ---")
+    console.log("--- startLottery called from contractContext testsf ---")
+    console.log("another start?")
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
     try {
-      const startLotteryTx = await lottery.startLottery()
-      await startLotteryTx.wait()
+      // const startLotteryTx = await lottery.startLottery()
+      // await startLotteryTx.wait()
+      const emitTx = await lottery.emitEvent()
+      await emitTx.wait()
     } catch (e) {
       console.log('error starting the lottery', e)
     }

@@ -114,4 +114,6 @@ describe("Lottery Unit Test", function () {
 
     expect(lastWinner).to.equal(addr1.address);
   })
+
+  
 });

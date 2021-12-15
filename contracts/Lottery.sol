@@ -10,6 +10,7 @@ contract Lottery is VRFConsumerBase  {
 
     event PickingWinner(bytes32 requestId);
     event PlayerEntered();
+    event StateChange(string state);
 
     enum LOTTERY_STATE {
         OPEN,
@@ -44,9 +45,14 @@ contract Lottery is VRFConsumerBase  {
         fee = _fee; // 0.1 LINK (Varies by network)
     }
 
+    function emitEvent() public {
+      emit StateChange("test");
+    }
+
     function startLottery() public {
         require(state == LOTTERY_STATE.CLOSED, "Lottery state must be closed to start a new lottery");
         state = LOTTERY_STATE.OPEN;
+        emit StateChange("OPEN");
     }
     
     function enterLottery() public payable {
@@ -75,6 +81,7 @@ contract Lottery is VRFConsumerBase  {
         state = LOTTERY_STATE.PICKING_WINNER;
         bytes32 requestId = requestRandomness(keyHash, fee);
         emit PickingWinner(requestId);
+        emit StateChange("PICKING_WINNER");
     }
 
     function fulfillRandomness(bytes32 requestId, uint256  randomness) internal override {
@@ -88,5 +95,6 @@ contract Lottery is VRFConsumerBase  {
         randomResult = randomness;
         console.log("Randomness");
         console.log(randomness);
+        emit StateChange("CLOSED");
     }
 }
