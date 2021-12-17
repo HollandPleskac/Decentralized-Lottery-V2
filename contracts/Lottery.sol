@@ -18,6 +18,12 @@ contract Lottery is VRFConsumerBase  {
         PICKING_WINNER
     }
 
+    struct LastWinnerData {
+      address lastWinner;
+      uint256 etherWonByLastWinner;
+      uint256 playersInLastLottery;
+    }
+
     AggregatorV3Interface internal priceFeed;
 
     bytes32 internal keyHash;
@@ -25,7 +31,7 @@ contract Lottery is VRFConsumerBase  {
     
     address[] public participants;
     uint256 public randomResult;
-    address public lastWinner;
+    LastWinnerData public lastWinnerData;
     LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
 
     constructor(
@@ -87,14 +93,11 @@ contract Lottery is VRFConsumerBase  {
     function fulfillRandomness(bytes32 requestId, uint256  randomness) internal override {
       
         uint256 indexOfWinner = randomness % participants.length; // NOTE: be careful about %0
+        lastWinnerData = LastWinnerData(participants[indexOfWinner],address(this).balance,participants.length);
         // TODO : transfer funds
-        lastWinner = participants[indexOfWinner];
         participants = new address[](0);
         state = LOTTERY_STATE.CLOSED;
-        // winner chosen event
         randomResult = randomness;
-        console.log("Randomness");
-        console.log(randomness);
         emit StateChange("CLOSED");
     }
 

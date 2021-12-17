@@ -78,7 +78,7 @@ describe("Lottery Unit Test", function () {
     // Start Lottery
     const startTx = await lottery.startLottery()
     await startTx.wait()
-      
+
     //DONT ENTER PARTICIPANTS
 
     await expect(lottery.endLottery()).to.be.revertedWith("Must have participants to pick a winner");
@@ -109,11 +109,11 @@ describe("Lottery Unit Test", function () {
     await randomnessCallbackTx.wait()
 
     // Get last winner
-    const lastWinner = await lottery.lastWinner()
-    console.log("lastWinner: ", lastWinner);
+    const lastWinnerData = await lottery.lastWinnerData()
+    console.log("lastWinner: ", lastWinnerData.lastWinner);
 
-    expect(lastWinner).to.equal(addr1.address);
+    expect(lastWinnerData.lastWinner).to.equal(addr1.address);
   })
 
-  
+
 });

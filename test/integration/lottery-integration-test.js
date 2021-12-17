@@ -49,11 +49,11 @@ describe("Lottery Unit Test", function () {
     await new Promise(r => setTimeout(r, 60000));
 
     // Get last winner
-    const lastWinner = await lottery.lastWinner()
-    console.log("lastWinner: ", lastWinner)
+    const lastWinnerData = await lottery.lastWinnerData()
+    console.log("lastWinner: ", lastWinnerData.lastWinner)
 
     const [account] = await ethers.getSigners()
-    expect(lastWinner).to.equal(account.address)
+    expect(lastWinnerData.lastWinner).to.equal(account.address)
 
   })
 });

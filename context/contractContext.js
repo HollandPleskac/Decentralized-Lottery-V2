@@ -14,7 +14,8 @@ const ContractContext = React.createContext({
   totalEther: null,
   startLottery: async () => { },
   enterLottery: async () => { },
-  endLottery: async () => { }
+  endLottery: async () => { },
+  getLastWinnerData: async () => { }
 })
 
 export const ContractContextProvider = (props) => {
@@ -30,9 +31,6 @@ export const ContractContextProvider = (props) => {
   // --- Initial State --- //
 
   useEffect(() => {
-
-
-
     const setContractData = async () => {
       try {
         const contract = await axios.get(`${url}Lottery.json`).then(res => res.data)  // axios.get returns an http response obj, res.data = Lottery contract
@@ -57,6 +55,7 @@ export const ContractContextProvider = (props) => {
   useEffect(() => {
     if (contractAddress && Contract) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
       console.log("listing for events at ", contractAddress)
 
       const stateChangeEvent = {
@@ -74,12 +73,12 @@ export const ContractContextProvider = (props) => {
         ]
       }
 
-      provider.on(stateChangeEvent, (state) => {
+      lottery.on(stateChangeEvent, (state) => {
         console.log("state change event fired! new state:", state)
         setContractState(state)
       })
 
-      provider.on(playerEnteredEvent, () => {
+      lottery.on(playerEnteredEvent, () => {
         console.log("new player entered the lottery",)
         setPlayers(prevState => prevState++)
       })
@@ -113,7 +112,8 @@ export const ContractContextProvider = (props) => {
     const signer = provider.getSigner()
     const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
     try {
-      const options = { value: ethers.utils.parseEther(enteredEther.toString()) }
+      const parsedEther = ethers.utils.parseEther(enteredEther.toString())
+      const options = { value: ethers.BigNumber.from(parsedEther) }
       const enterLotteryAcc1Tx = await lottery.enterLottery(options)
       await enterLotteryAcc1Tx.wait()
       console.log("entered tx", enterLotteryAcc1Tx)
@@ -139,13 +139,25 @@ export const ContractContextProvider = (props) => {
     }
   }
 
-  // --- Reusable Functions --- //
+  const getLastWinnerData = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
+    const lastWinnerData = await lottery.lastWinnerData()
+    console.log("last winner is ", lastWinnerData.lastWinner)
+    return ({
+      lastWinner: lastWinnerData.lastWinner,
+      etherWon: ethers.utils.formatEther(lastWinnerData.etherWonByLastWinner),
+      players: lastWinnerData.playersInLastLottery.toNumber()
+    })
+  }
+
+  // --- Internal Functions (only used in this context) --- //
 
   const getContractBalance = async (contractAddr) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const balance = await provider.getBalance(contractAddr);
-    console.log("total eth", balance.toNumber())
-    return balance.toNumber();
+    console.log("total eth", ethers.utils.formatEther(balance))
+    return ethers.utils.formatEther(balance);
   }
 
   const getContractState = async (Contract, contractAddress) => {
@@ -178,7 +190,8 @@ export const ContractContextProvider = (props) => {
       totalEther,
       startLottery,
       enterLottery,
-      endLottery
+      endLottery,
+      getLastWinnerData
     }} >
       {props.children}
     </ContractContext.Provider>
