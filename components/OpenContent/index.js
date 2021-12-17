@@ -7,13 +7,13 @@ import EndLotteryBtn from './EndLotteryBtn'
 const OpenContent = () => {
   const contractCtx = useContext(ContractContext)
 
+  const totalEther = contractCtx.totalEther
+  const players = contractCtx.players
+
   // local state
   const [enteredEther, setEnteredEther] = useState('')
   const [feedback, setFeedback] = useState('')
   const [loading, setLoading] = useState(false)
-
-  const totalEther = 0
-  const players = []
 
   const enterLotteryHandler = async () => {
     if (isNaN(enteredEther)) {
@@ -41,7 +41,7 @@ const OpenContent = () => {
       <div >
         <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
         <h1 className='text-5xl text-blue-600 ' >Want to try your luck?</h1>
-        <p className='mt-4 text-center text-gray-600' >{(players && players.length) || 0} people entered, competing to win {totalEther || 0} ether</p>
+        <p className='mt-4 text-center text-gray-600' >{players} people entered, competing to win {totalEther} ether</p>
         <div className='flex items-center mt-10' >
           <EtherInput value={enteredEther} changeHandler={enteredEtherChangeHandler} loading={loading} />
           <EnterLotteryBtn enterLotteryFn={enterLotteryHandler} loading={loading} />

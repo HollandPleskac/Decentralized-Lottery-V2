@@ -13,14 +13,15 @@
     "@chainlink/contracts": "^0.2.2",
     "@chainlink/token": "^1.1.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "axios": "^0.24.0",
     "dotenv": "^10.0.0",
-    "react-spinners": "^0.11.0",
     "next": "12.0.7",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-spinners": "^0.11.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.3",
