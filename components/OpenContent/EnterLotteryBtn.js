@@ -1,4 +1,5 @@
 import React from 'react'
+import ClipLoader from "react-spinners/ClipLoader";
 
 const EnterLotteryBtn = ({ enterLotteryFn, loading }) => {
 
@@ -14,8 +15,8 @@ const EnterLotteryBtn = ({ enterLotteryFn, loading }) => {
       style={{ height: 50 }}
     >
       {
-        // loading ? <ClipLoader color={'#fff'} size={23} /> : 'Enter'
-        loading ? <p>loading</p> : 'Enter'
+        loading ? <ClipLoader color={'#fff'} size={23} /> : 'Enter'
+        // loading ? <p>loading</p> : 'Enter'
       }
     </button>
   )

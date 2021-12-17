@@ -1,41 +1,26 @@
-import React, { useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import { ethers } from 'ethers'
 import ContractContext from '../context/contractContext'
-import MetaMaskBtn from '../components/MetaMaskBtn'
+import Header from '../components/Header'
+import OpenContent from '../components/OpenContent'
+import ClosedContent from '../components/ClosedContent'
 
 const HomePage = () => {
   const contractCtx = useContext(ContractContext)
-
-  const startHandler = async () => {
-    await contractCtx.startLottery()
-  }
-
-  const enterHandler = async () => {
-    await contractCtx.enterLottery()
-
-  }
-
-  const endHandler = async () => {
-    await contractCtx.endLottery()
-
-  }
-
-
   return (
-    <div className="h-screen flex flex-col justify-center items-center" >
-      <MetaMaskBtn />
-      <ActionComp fn={startHandler} name="start" />
-      <ActionComp fn={enterHandler} name="enter" />
-      <ActionComp fn={endHandler} name="end" />
-
+    <div className="h-screen flex flex-col items-center" >
+      {/* <MetaMaskBtn /> */}
+      <Header />
+      {contractCtx.contractState === 'OPEN' && <OpenContent />}
+      {contractCtx.contractState === 'PICKING_WINNER' && <PickingWinnerContent />}
+      {contractCtx.contractState === 'CLOSED' && <ClosedContent />}
     </div>
   )
 }
 
-const ActionComp = ({ fn, name }) => {
+const PickingWinnerContent = () => {
   return (
-    <button onClick={fn} >{name}</button>
-
+    <div>content 3</div>
   )
 }
 

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react'
 // import ClipLoader from "react-spinners/ClipLoader";
 import ConnectionContext from '../context/connectionContext'
 import Header from '../components/Header'
-import EnterLotteryBtn from '../components/EnterLotteryBtn'
+import EnterLotteryBtn from '../components/OpenContent/EnterLotteryBtn'
 import EtherInput from '../components/EtherInput'
 
 const HomePage = () => {

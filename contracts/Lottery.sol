@@ -46,7 +46,7 @@ contract Lottery is VRFConsumerBase  {
     }
 
     function emitEvent() public {
-      emit StateChange("test");
+      emit PlayerEntered();
     }
 
     function startLottery() public {
