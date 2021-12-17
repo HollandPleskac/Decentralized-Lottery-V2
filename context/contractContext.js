@@ -23,19 +23,26 @@ export const ContractContextProvider = (props) => {
   const [contractAddress, setContractAddress] = useState()
 
   // contract state
-  const [contractState, setContractState] = useState('PICKING_WINNER')
+  const [contractState, setContractState] = useState('LOADING')
   const [players, setPlayers] = useState()
   const [totalEther, setTotalEther] = useState()
 
+  // --- Initial State --- //
+
   useEffect(() => {
+
+
+
     const setContractData = async () => {
       try {
         const contract = await axios.get(`${url}Lottery.json`).then(res => res.data)  // axios.get returns an http response obj, res.data = Lottery contract
         const address = await axios.get(`${url}LotteryAddress.json`).then(res => res.data.address)
         setContract(contract)
         setContractAddress(address)
-
         console.log('set contract data')
+        setPlayers(await getPlayerCount(contract, address))
+        setTotalEther(await getContractBalance(address))
+        setContractState(await getContractState(contract, address))
       } catch (e) {
         console.log('err', e)
       }
@@ -45,10 +52,11 @@ export const ContractContextProvider = (props) => {
   }, [])
 
 
+  // --- Events --- //
+
   useEffect(() => {
     if (contractAddress && Contract) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
       console.log("listing for events at ", contractAddress)
 
       const stateChangeEvent = {
@@ -67,7 +75,7 @@ export const ContractContextProvider = (props) => {
       }
 
       provider.on(stateChangeEvent, (state) => {
-        console.log("state change event fired! nefw state:", state)
+        console.log("state change event fired! new state:", state)
         setContractState(state)
       })
 
@@ -83,7 +91,7 @@ export const ContractContextProvider = (props) => {
   }, [contractAddress, Contract])
 
 
-
+  // --- Lottery Functions --- //
 
   const startLottery = async () => {
     console.log("--- startLottery called from contractContext testsf ---")
@@ -92,10 +100,8 @@ export const ContractContextProvider = (props) => {
     const signer = provider.getSigner()
     const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
     try {
-      // const startLotteryTx = await lottery.startLottery()
-      // await startLotteryTx.wait()
-      const emitTx = await lottery.emitEvent()
-      await emitTx.wait()
+      const startLotteryTx = await lottery.startLottery()
+      await startLotteryTx.wait()
     } catch (e) {
       console.log('error starting the lottery', e)
     }
@@ -111,7 +117,7 @@ export const ContractContextProvider = (props) => {
       const enterLotteryAcc1Tx = await lottery.enterLottery(options)
       await enterLotteryAcc1Tx.wait()
       console.log("entered tx", enterLotteryAcc1Tx)
-
+      setTotalEther(await getContractBalance(contractAddress))
     } catch (e) {
       console.log('error entering the lottery', e)
       throw e
@@ -126,9 +132,40 @@ export const ContractContextProvider = (props) => {
     try {
       const endLotteryAcc1Tx = await lottery.endLottery()
       await endLotteryAcc1Tx.wait()
+      setTotalEther(0)
+      setPlayers(0)
     } catch (e) {
       console.log('error ending the lottery', e)
     }
+  }
+
+  // --- Reusable Functions --- //
+
+  const getContractBalance = async (contractAddr) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const balance = await provider.getBalance(contractAddr);
+    console.log("total eth", balance.toNumber())
+    return balance.toNumber();
+  }
+
+  const getContractState = async (Contract, contractAddress) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
+    let contractState = await lottery.state()
+    console.log("got contract state of (0 OPEN, 1 CLOSED, 2 PICKING_WINNER)", contractState)
+    switch (contractState) {
+      case 0: return 'OPEN'
+      case 1: return 'CLOSED'
+      case 2: return 'PICKING_WINNER'
+    }
+  }
+
+  const getPlayerCount = async (Contract, contractAddress) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
+    const playerCount = await lottery.getParticipantsLength()
+    console.log("getPlayerCount ", playerCount.toNumber())
+    return playerCount.toNumber()
   }
 
 

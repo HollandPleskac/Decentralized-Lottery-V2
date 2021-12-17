@@ -97,4 +97,8 @@ contract Lottery is VRFConsumerBase  {
         console.log(randomness);
         emit StateChange("CLOSED");
     }
+
+    function getParticipantsLength() public view returns(uint256) {
+      return participants.length;
+    }
 }
