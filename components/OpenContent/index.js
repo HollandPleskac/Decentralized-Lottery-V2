@@ -23,8 +23,6 @@ const OpenContent = () => {
 
     setLoading(true)
     try {
-      // TODO: call enter lottery
-      console.log("entering lottery")
       await contractCtx.enterLottery(enteredEther)
       setFeedback('')
     } catch (e) {

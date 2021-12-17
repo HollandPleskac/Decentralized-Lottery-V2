@@ -23,7 +23,7 @@ export const ContractContextProvider = (props) => {
   const [contractAddress, setContractAddress] = useState()
 
   // contract state
-  const [contractState, setContractState] = useState('CLOSED')
+  const [contractState, setContractState] = useState('PICKING_WINNER')
   const [players, setPlayers] = useState()
   const [totalEther, setTotalEther] = useState()
 
