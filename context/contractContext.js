@@ -72,7 +72,7 @@ export const ContractContextProvider = (props) => {
       const playerEnteredEvent = {
         address: contractAddress,
         topics: [
-          ethers.utils.id("PlayerEntered()")
+          ethers.utils.id("PlayerEntered(uint256)")
         ]
       }
 
