@@ -19,19 +19,19 @@ contract Lottery is VRFConsumerBase  {
     }
 
     struct LastWinnerData {
-      address lastWinner;
+      address payable lastWinner;
       uint256 etherWonByLastWinner;
       uint256 playersInLastLottery;
     }
 
     AggregatorV3Interface internal priceFeed;
-
     bytes32 internal keyHash;
     uint256 internal fee;
     
-    address[] public participants;
+    address payable[] public participants;
     uint256 public randomResult;
     LastWinnerData public lastWinnerData;
+    address public owner;
     LOTTERY_STATE public state = LOTTERY_STATE.CLOSED;
 
     constructor(
@@ -49,13 +49,15 @@ contract Lottery is VRFConsumerBase  {
         priceFeed = AggregatorV3Interface(_priceFeedAddress);
         keyHash = _keyhash;
         fee = _fee; // 0.1 LINK (Varies by network)
+        owner = msg.sender;
     }
 
-    function emitEvent() public {
-      emit PlayerEntered();
+    modifier onlyOwner() {
+        require(msg.sender == owner, "You must be the owner to call this function");
+        _;
     }
 
-    function startLottery() public {
+    function startLottery() public onlyOwner {
         require(state == LOTTERY_STATE.CLOSED, "Lottery state must be closed to start a new lottery");
         state = LOTTERY_STATE.OPEN;
         emit StateChange("OPEN");
@@ -64,7 +66,7 @@ contract Lottery is VRFConsumerBase  {
     function enterLottery() public payable {
         require(state == LOTTERY_STATE.OPEN, "Can't enter a closed lottery, lottery must be open");
         require(ethereumToUSD(msg.value) >= 50, "Need to send $50 or more in ETH");
-        participants.push(msg.sender);
+        participants.push(payable(msg.sender));
         emit PlayerEntered();
     }
 
@@ -78,7 +80,7 @@ contract Lottery is VRFConsumerBase  {
         return (ethPrice * ethAmount / 10**36); // ethPrice and ethAmount both have 18 decimals. Get rid of the 36 decimals to get usd value
     }
 
-    function endLottery() public {
+    function endLottery() public onlyOwner {
         require(LINK.balanceOf(address(this)) * (10**18) >= fee, "Not enough LINK - fill contract with faucet");
         require(state == LOTTERY_STATE.OPEN, "Lottery must be in process");
         // TODO : Make sure that you have participants YOU DONT WANT TO %0
@@ -93,8 +95,8 @@ contract Lottery is VRFConsumerBase  {
       
         uint256 indexOfWinner = randomness % participants.length; // NOTE: be careful about %0
         lastWinnerData = LastWinnerData(participants[indexOfWinner],address(this).balance,participants.length);
-        // TODO : transfer funds
-        participants = new address[](0);
+        participants[indexOfWinner].transfer(address(this).balance);
+        participants = new address payable[](0);
         state = LOTTERY_STATE.CLOSED;
         randomResult = randomness;
         emit StateChange("CLOSED");

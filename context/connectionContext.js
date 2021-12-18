@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react'
+/*
+  I decided to manager the isOwner state here. Unfortunately, the owner is located in the ContractContext.
+  I import the contract context to get access to the owner variable.  Then I update the isowner variable here.
+*/
+
+import React, { useState, useEffect, useContext } from 'react'
+import ContractContext from './contractContext'
 
 const url = 'http://localhost:3000/'
 // const url = 'https://{INSERT_PROJECT}.vercel.app/'
@@ -6,11 +12,15 @@ const url = 'http://localhost:3000/'
 const ConnectionContext = React.createContext({
   connection: '',
   account: '',
+  isOwner: false,
 })
 
 export const ConnectionContextProvider = (props) => {
+  const contractCtx = useContext(ContractContext)
+
   const [connection, setConnection] = useState('')
   const [account, setAccount] = useState(null)
+  const [isOwner, setIsOwner] = useState() // is this account the owner of the lottery contract
 
   const isMetaMaskInstalled = async () => {
     // if they dont have metamask 'ethereum' doesnt exist, need to use 'window.ethereum'
@@ -25,7 +35,13 @@ export const ConnectionContextProvider = (props) => {
   }
 
   useEffect(() => {
-    // if ( check for contract ) {
+    const determineIsOwner = async (account) => {
+      if (account === contractCtx.owner.toLowerCase()) // account address returned by meta mask is in all lowercase letters
+        setIsOwner(true)
+      else
+        setIsOwner(false)
+    }
+
     const setConnectionState = async () => {
       if (!(await isMetaMaskInstalled())) {
         setConnection('NOT INSTALLED')
@@ -35,6 +51,7 @@ export const ConnectionContextProvider = (props) => {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' })
         setConnection('CONNECTED')
         setAccount(accounts[0])
+        determineIsOwner(accounts[0])
         return
       } else {
         setConnection('DISCONNECTED')
@@ -43,17 +60,28 @@ export const ConnectionContextProvider = (props) => {
       }
     }
 
-    setConnectionState() // initial state
+    if (contractCtx.owner) {
+      setConnectionState() // initial state
 
-    window.ethereum.on('accountsChanged', function (accounts) {
-      console.log('accounts changed', accounts)
-      setConnectionState()
-    })
-  }, [])
+      const accountsChangedHandler = async function (accounts) {
+        console.log('accounts changed', accounts)
+        setConnectionState()
+        determineIsOwner(accounts[0])
+      }
+
+      window.ethereum.on('accountsChanged', accountsChangedHandler)
+
+      return (() => {
+        window.ethereum.removeListener('accountsChanged', accountsChangedHandler)
+      })
+    }
+
+  }, [contractCtx.owner])
 
   const contextValue = {
     connection: connection,
     account: account,
+    isOwner: isOwner
   }
 
   return (

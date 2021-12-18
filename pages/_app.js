@@ -4,11 +4,11 @@ import { ContractContextProvider } from '../context/contractContext'
 
 function MyApp({ Component, pageProps }) {
   return (
-    <ConnectionContextProvider>
-      <ContractContextProvider>
+    <ContractContextProvider>
+      <ConnectionContextProvider>
         <Component {...pageProps} />
-      </ContractContextProvider>
-    </ConnectionContextProvider >
+      </ConnectionContextProvider >
+    </ContractContextProvider>
   )
 }
 

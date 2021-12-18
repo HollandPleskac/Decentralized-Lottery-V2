@@ -12,6 +12,7 @@ const ContractContext = React.createContext({
   contractState: null,
   players: null,
   totalEther: null,
+  owner: null,
   startLottery: async () => { },
   enterLottery: async () => { },
   endLottery: async () => { },
@@ -27,6 +28,7 @@ export const ContractContextProvider = (props) => {
   const [contractState, setContractState] = useState('LOADING')
   const [players, setPlayers] = useState()
   const [totalEther, setTotalEther] = useState()
+  const [owner, setOwner] = useState()
 
   // --- Initial State --- //
 
@@ -41,6 +43,7 @@ export const ContractContextProvider = (props) => {
         setPlayers(await getPlayerCount(contract, address))
         setTotalEther(await getContractBalance(address))
         setContractState(await getContractState(contract, address))
+        setOwner(await getOwner(contract, address))
       } catch (e) {
         console.log('err', e)
       }
@@ -94,7 +97,6 @@ export const ContractContextProvider = (props) => {
 
   const startLottery = async () => {
     console.log("--- startLottery called from contractContext testsf ---")
-    console.log("another start?")
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
@@ -118,6 +120,7 @@ export const ContractContextProvider = (props) => {
       await enterLotteryAcc1Tx.wait()
       console.log("entered tx", enterLotteryAcc1Tx)
       setTotalEther(await getContractBalance(contractAddress))
+      setPlayers(await getPlayerCount(Contract, contractAddress))
     } catch (e) {
       console.log('error entering the lottery', e)
       throw e
@@ -180,6 +183,14 @@ export const ContractContextProvider = (props) => {
     return playerCount.toNumber()
   }
 
+  const getOwner = async (Contract, contractAddress) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
+    const owner = await lottery.owner()
+    console.log("owner of contract ", owner)
+    return owner
+  }
+
 
   return (
     <ContractContext.Provider value={{
@@ -188,6 +199,7 @@ export const ContractContextProvider = (props) => {
       contractState,
       players,
       totalEther,
+      owner,
       startLottery,
       enterLottery,
       endLottery,

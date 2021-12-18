@@ -1,11 +1,13 @@
 import React, { useState, useContext } from 'react'
 import ContractContext from '../../context/contractContext'
+import ConnectionContext from '../../context/connectionContext'
 import EtherInput from './EtherInput'
 import EnterLotteryBtn from './EnterLotteryBtn'
 import EndLotteryBtn from './EndLotteryBtn'
 
 const OpenContent = () => {
   const contractCtx = useContext(ContractContext)
+  const connectionCtx = useContext(ConnectionContext)
 
   const totalEther = contractCtx.totalEther
   const players = contractCtx.players
@@ -51,9 +53,11 @@ const OpenContent = () => {
             ? <p className='text-gray-600 text-center text-sm mt-2' >&nbsp;</p>
             : <p className='text-gray-600 text-center text-sm mt-2' >{feedback}</p>
         }
-        <div className='text-center mt-2' >
-          <EndLotteryBtn />
-        </div>
+        {
+          connectionCtx.isOwner && <div className='text-center mt-2' >
+            <EndLotteryBtn />
+          </div>
+        }
       </div>
     </div>
   )

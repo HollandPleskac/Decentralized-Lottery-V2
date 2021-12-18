@@ -1,17 +1,17 @@
 import React, { useState, useContext } from 'react'
-import ContractContext from '../../context/contractContext'
 import ClipLoader from "react-spinners/ClipLoader";
 import PropagateLoader from "react-spinners/PropagateLoader";
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 
+import ContractContext from '../../context/contractContext'
+import ConnectionContext from '../../context/connectionContext'
 import StatsCard from './StatsCard'
 import StartLotteryBtn from './StartLotteryBtn'
 
 const ClosedContent = () => {
   const contractCtx = useContext(ContractContext)
+  const connectionCtx = useContext(ConnectionContext)
 
   const [lastWinnerAddress, setLastWinnerAddress] = useState()
   const [etherWon, setEtherWon] = useState()
@@ -23,8 +23,6 @@ const ClosedContent = () => {
       setLastWinnerAddress(lastWinnerData.lastWinner)
       setEtherWon(lastWinnerData.etherWon)
       setPlayersInLastLottery(lastWinnerData.players)
-      console.log(lastWinnerData)
-      console.log('last winner data above')
     }
 
     setData()
@@ -49,7 +47,7 @@ const ClosedContent = () => {
   if (lastWinnerAddress === '0x0000000000000000000000000000000000000000' && etherWon === '0.0' && playersInLastLottery === 0) {
     return (
       <div className='h-full w-full flex flex-col justify-center items-center' >
-        <StartLotteryBtn />
+        {connectionCtx.isOwner && <StartLotteryBtn />}
         <p className='mb-2 mt-2 text-gray-900' >There is no previous winner data to display</p>
         <p className='mb-4' >Wait for the owner to start the lottery</p>
         <PropagateLoader color="#2563eb" />
@@ -64,7 +62,7 @@ const ClosedContent = () => {
       <FontAwesomeIcon icon={faTrophy} className='text-9xl text-yellow-400' />
       <p className='mt-5 text-gray-900' >Congradulations to {formatAddress(lastWinnerAddress)}<br />for being chosen as the winner!</p>
       <p className='mt-2 mb-2' >{etherWon} Ether was won</p>
-      <StartLotteryBtn />
+      {connectionCtx.isOwner && <StartLotteryBtn />}
       <StatsCard players={playersInLastLottery} ether={etherWon} />
     </div>
   )
