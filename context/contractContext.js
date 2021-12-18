@@ -59,7 +59,7 @@ export const ContractContextProvider = (props) => {
     if (contractAddress && Contract) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const lottery = new ethers.Contract(contractAddress, Contract.abi, provider)
-      console.log("listing for events at ", contractAddress)
+      console.log("listening for events at ", contractAddress)
 
       const stateChangeEvent = {
         address: contractAddress,
@@ -81,9 +81,9 @@ export const ContractContextProvider = (props) => {
         setContractState(state)
       })
 
-      lottery.on(playerEnteredEvent, () => {
-        console.log("new player entered the lottery",)
-        setPlayers(prevState => prevState++)
+      lottery.on(playerEnteredEvent, async (playerCount) => {
+        console.log("new player entered the lottery", playerCount)
+        setPlayers(playerCount)
       })
 
       return (() => {
