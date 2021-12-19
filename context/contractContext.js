@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { ethers } from 'ethers'
 
-const url = 'http://localhost:3000/'
-// const url = 'https://decentralized-lottery-v2.vercel.app/'
+// const url = 'http://localhost:3000/'
+const url = 'https://decentralized-lottery-v2.vercel.app/'
 // const decimals = ethers.BigNumber.from(10).pow(18)
 
 const ContractContext = React.createContext({
