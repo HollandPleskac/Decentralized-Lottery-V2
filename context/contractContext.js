@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { ethers } from 'ethers'
 
-// const url = 'http://localhost:3000/'
-const url = 'https://decentralized-lottery-v2.vercel.app/'
+const url = 'http://localhost:3000/'
+// const url = 'https://decentralized-lottery-v2.vercel.app/'
 // const decimals = ethers.BigNumber.from(10).pow(18)
 
 const ContractContext = React.createContext({
@@ -132,8 +132,12 @@ export const ContractContextProvider = (props) => {
     const signer = provider.getSigner()
     const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
     try {
-      const endLotteryAcc1Tx = await lottery.endLottery()
-      await endLotteryAcc1Tx.wait()
+      const endLotteryTx = await lottery.endLottery()
+      const recipt = await endLotteryTx.wait()
+      // const pickingWinnerEvent = recipt.events.find(el => el.event === "PickingWinner")
+      // const requestId = pickingWinnerEvent.args.requestId
+      // console.log("req id", requestId)
+      console.log("recipt", recipt)
       setTotalEther(0)
       setPlayers(0)
     } catch (e) {

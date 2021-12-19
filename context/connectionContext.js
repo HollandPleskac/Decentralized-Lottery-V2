@@ -6,9 +6,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import ContractContext from './contractContext'
 
-// const url = 'http://localhost:3000/'
-const url = 'https://decentralized-lottery-v2.vercel.app/'
-
 const ConnectionContext = React.createContext({
   connection: '',
   account: '',
