@@ -133,11 +133,11 @@ export const ContractContextProvider = (props) => {
     const lottery = new ethers.Contract(contractAddress, Contract.abi, signer)
     try {
       const endLotteryTx = await lottery.endLottery()
-      const recipt = await endLotteryTx.wait()
+      await endLotteryTx.wait()
       // const pickingWinnerEvent = recipt.events.find(el => el.event === "PickingWinner")
       // const requestId = pickingWinnerEvent.args.requestId
       // console.log("req id", requestId)
-      console.log("recipt", recipt)
+      // console.log("recipt", recipt)
       setTotalEther(0)
       setPlayers(0)
     } catch (e) {
