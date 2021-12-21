@@ -66,8 +66,9 @@ async function deployHardhat() {
 
   // ---------- Fund Lottery Contract
 
-  const linkTransferTx = await mockLinkToken.transfer(lottery.address, 1)
-  await linkTransferTx.wait()
+  // const linkTransferTx = await mockLinkToken.transfer(lottery.address, "9000000000000000000")
+  // await linkTransferTx.wait()
+  await hre.run("fund-link", { contract: lottery.address, linkaddress: mockLinkToken.address })
   console.log("Successfully funded link")
 
   updatePublicPath(lottery.address)

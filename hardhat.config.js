@@ -1,6 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("@appliedblockchain/chainlink-plugins-fund-link")
-// require("./tasks/mock-random-number")
+require("./tasks/mock-random-number")
 require('dotenv').config()
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
